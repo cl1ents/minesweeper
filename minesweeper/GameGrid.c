@@ -54,9 +54,21 @@ void displayGameGrid(GameGrid* grid);
 /// <param name="grid"></param>
 void initGrid(GameGrid* grid) 
 {
+    int bombCount = ARRAY_SIZE / 8;
     for (int i = 0; i < ARRAY_SIZE; i++)
     {
-        grid->bombGrid[i] = rand() % 10 == 1;
+        grid->bombGrid[i] = 0; // rand() % 10 == 1;
+    }
+    
+    while (bombCount > 0)
+    {
+        int x = rand() % SIZE;
+        int y = rand() % SIZE;
+        if (grid->bombGrid[x + y * SIZE] == 0 && countNeighbours(grid, x, y) < 7)
+        {
+            grid->bombGrid[x + y * SIZE] = 1;
+            bombCount--;
+        }
     }
 
     for (int i = 0; i < ARRAY_SIZE; i++)
@@ -72,7 +84,7 @@ int countNeighbours(GameGrid* grid, int x, int y) {
         for (int by = y - 1; by <= y + 1; by++)
         {
             if (bx >= 0 && bx < SIZE && by >= 0 && by < SIZE) {
-                count += grid->bombGrid[bx + by * 20];
+                count += grid->bombGrid[bx + by * SIZE];
             }
         }
     }
@@ -90,13 +102,13 @@ void completeGrid(GameGrid* grid)
         for (int y = 0; y < SIZE; y++)
         {
             int index = 1;
-            if (grid->bombGrid[x + y * 20] == 1) {
+            if (grid->bombGrid[x + y * SIZE] == 1) {
                 index = 11;
             }
             else {
                 index += countNeighbours(grid, x, y);
             }
-            grid->displayGrid[x + y * 20] = charset[index];
+            grid->displayGrid[x + y * SIZE] = charset[index];
         }
     }
 }
@@ -108,11 +120,11 @@ void completeGrid(GameGrid* grid)
 /// <param name="x"></param>
 /// <param name="y"></param>
 void placeFlag(GameGrid* grid, int x, int y) {
-    if (grid->displayGrid[x + y * 20] == charset[0]) {
-        grid->displayGrid[x + y * 20] = charset[12];
+    if (grid->displayGrid[x + y * SIZE] == charset[0]) {
+        grid->displayGrid[x + y * SIZE] = charset[12];
     }
-    else if (grid->displayGrid[x + y * 20] == charset[12]) {
-        grid->displayGrid[x + y * 20] = charset[0];
+    else if (grid->displayGrid[x + y * SIZE] == charset[12]) {
+        grid->displayGrid[x + y * SIZE] = charset[0];
     }
 }
 
@@ -125,15 +137,15 @@ void placeFlag(GameGrid* grid, int x, int y) {
 /// <returns>if there's a bomb, it returns 1, else 0</returns>
 int digAt(GameGrid* grid, int x, int y)
 {
-    if (grid->bombGrid[x + y * 20] == 1) {
-        grid->displayGrid[x + y * 20] = charset[11];
+    if (grid->bombGrid[x + y * SIZE] == 1) {
+        grid->displayGrid[x + y * SIZE] = charset[11];
         return 1;
     }
     else {
         int index = 1;
         int count = countNeighbours(grid, x, y);
         index += count;
-        grid->displayGrid[x + y * 20] = charset[index];
+        grid->displayGrid[x + y * SIZE] = charset[index];
 
         if (count == 0) {
             for (int bx = x - 1; bx <= x + 1; bx++)
@@ -142,7 +154,7 @@ int digAt(GameGrid* grid, int x, int y)
                 {
                     for (int by = y - 1; by <= y + 1; by++)
                     {
-                        if (by >= 0 && by < SIZE && (grid->displayGrid[bx + by * 20] == charset[0] || grid->displayGrid[bx + by * 20] == charset[12])) {
+                        if (by >= 0 && by < SIZE && (grid->displayGrid[bx + by * SIZE] == charset[0] || grid->displayGrid[bx + by * SIZE] == charset[12])) {
                             if (((bx == x - 1 && by == y - 1) || (bx == x + 1 && by == y - 1) || (bx == x + 1 && by == y + 1) || (bx == x - 1 && by == y + 1)))
                             {
                                 if (countNeighbours(grid, bx, by) > 0)
@@ -219,12 +231,12 @@ void displayGameGrid(GameGrid* grid)
         printf("\n%02d | ", x);
         for (int y = 0; y < SIZE; y++)
         {
-            int charInd = findIndex(grid->displayGrid[x + y * 20]);
+            int charInd = findIndex(grid->displayGrid[x + y * SIZE]);
             char* colour = "";
             if (charInd >= 0) {
                 colour = colours[charInd];
             }
-            printf("%s%c  ", colour, grid->displayGrid[x + y * 20]);
+            printf("%s%c  ", colour, grid->displayGrid[x + y * SIZE]);
         }
         printf(ANSI_COLOR_RESET);
     }
