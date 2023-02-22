@@ -10,7 +10,31 @@
 #define SIZE 20
 #define ARRAY_SIZE SIZE*SIZE
 
-static const char charset[] = ". 123456789+F";
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+#define COLOR_BLACK  "\033[0;30m"
+#define COLOR_WHITE "\033[0;37m"
+
+static const char charset[] = ". 123456789*F";
+static const char* colours[] = {
+    COLOR_WHITE,
+    ANSI_COLOR_RESET,
+    ANSI_COLOR_BLUE,
+    ANSI_COLOR_GREEN,
+    ANSI_COLOR_RED,
+    ANSI_COLOR_MAGENTA,
+    ANSI_COLOR_YELLOW,
+    ANSI_COLOR_CYAN,
+    COLOR_BLACK,
+    COLOR_WHITE,
+    COLOR_BLACK,
+    ANSI_COLOR_RED
+};
 
 void initBombGrid(int grid[ARRAY_SIZE]);
 void initGameGrid(char grid[ARRAY_SIZE]);
@@ -39,18 +63,26 @@ int main()
     initGameGrid(gameGrid);
 
     int bombCount = countBombs(bombGrid);
-
     // digAt(bombGrid, gameGrid, 0, 4);
     
     while (playing) 
     {
         if (system("CLS")) system("clear");
         displayGameGrid(gameGrid);
-        
         printf("\nBOMBS: %d\nTO DIG: %d", bombCount, countFound(gameGrid));
         Input input = playerInput();
         
-        playing = !digAt(bombGrid, gameGrid, input.x, input.y);
+        if (input.flag) {
+            if (gameGrid[input.x + input.y * 20] == charset[0]) {
+                gameGrid[input.x + input.y * 20] = charset[12];
+            }
+            else if (gameGrid[input.x + input.y * 20] == charset[12]) {
+                gameGrid[input.x + input.y * 20] = charset[0];
+            }
+        }
+        else {
+            playing = !digAt(bombGrid, gameGrid, input.x, input.y);
+        }
 
         if (bombCount == countFound(gameGrid))
         {
@@ -189,6 +221,19 @@ int digAt(int bombGrid[ARRAY_SIZE], char gameGrid[ARRAY_SIZE], int x, int y)
 
 // Display functions
 
+int findIndex(char character) {
+    int index = -1;
+
+    for (int i = 0; i < sizeof charset; i++) {
+        if (charset[i] == character) {
+            index = i;
+            break;
+        }
+    }
+
+    return index;
+}
+
 /// <summary>
 /// displays the grid
 /// </summary>
@@ -211,8 +256,14 @@ void displayGameGrid(char grid[ARRAY_SIZE])
         printf("\n%02d | ", x);
         for (int y = 0; y < SIZE; y++)
         {
-            printf("%c  ", grid[x + y * 20]);
+            int charInd = findIndex(grid[x + y * 20]);
+            char* colour = "";
+            if (charInd >= 0) {
+                colour = colours[charInd];
+            }
+            printf("%s%c  ", colour, grid[x + y * 20]);
         }
+        printf(ANSI_COLOR_RESET);
     }
 }
 
@@ -257,23 +308,27 @@ void Flush()
 /// </summary>
 Input playerInput()
 {
-    int playerInputX;
-    int playerInputY;
+    int playerInputX = -1;
+    int playerInputY = -1;
     Input Return;
     Return.flag = 0;
 
-    printf("\nWhere do u want to dig (X Y)> ");
+    printf("\nDo you want to place a flag? (y/N)> ");
 
 
-    (void)scanf_s("%d%d", &playerInputX, &playerInputY);
-    Flush();
+    //(void)scanf_s("%d%d", &playerInputX, &playerInputY);
+    Return.flag = getchar() == 'y';
+
+    char* msg = Return.flag ? "place a flag" : "dig";
+    char* valid = "";
 
     while (!(playerInputX >= 0 && playerInputX < SIZE && playerInputY >= 0 && playerInputY < SIZE))
     {
-        printf("\nSelect a VALID place to dig (X Y)> ");
+        printf("\nSelect a %splace to %s (X Y)> ", valid, msg);
 
         (void)scanf_s("%d%d", &playerInputX, &playerInputY);
         Flush();
+        valid = "VALID ";
     }
 
     Return.x = playerInputX;
