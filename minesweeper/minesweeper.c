@@ -32,7 +32,8 @@ static const char* colours[] = {
     ANSI_COLOR_CYAN,
     COLOR_BLACK,
     COLOR_WHITE,
-    COLOR_BLACK,
+    ANSI_COLOR_RESET,
+    COLOR_WHITE,
     ANSI_COLOR_RED
 };
 
@@ -81,7 +82,8 @@ int main()
             }
         }
         else {
-            playing = !digAt(bombGrid, gameGrid, input.x, input.y);
+            if (gameGrid[input.x + input.y * 20] != charset[12])
+                 playing = !digAt(bombGrid, gameGrid, input.x, input.y);
         }
 
         if (bombCount == countFound(gameGrid))
@@ -306,33 +308,30 @@ void Flush()
 /// <summary>
 /// gets input from user
 /// </summary>
-Input playerInput()
-{
+
+Input playerInput() {
     int playerInputX = -1;
     int playerInputY = -1;
     Input Return;
     Return.flag = 0;
 
-    printf("\nDo you want to place a flag? (y/N)> ");
-
-
-    //(void)scanf_s("%d%d", &playerInputX, &playerInputY);
-    Return.flag = getchar() == 'y';
-
-    char* msg = Return.flag ? "place a flag" : "dig";
-    char* valid = "";
-
+    printf("\n\nFormat: 'X Y', add an 'f' at the start if you want to place a flag (Example: 'f 10 10', '5 8')");
+    char* valid = "Where do you want to play?";
     while (!(playerInputX >= 0 && playerInputX < SIZE && playerInputY >= 0 && playerInputY < SIZE))
     {
-        printf("\nSelect a %splace to %s (X Y)> ", valid, msg);
+        printf("\n%s> ", valid);
 
-        (void)scanf_s("%d%d", &playerInputX, &playerInputY);
-        Flush();
-        valid = "VALID ";
+        char str[20];
+        fgets(str, 20, stdin);
+        
+        Return.flag = tolower(str[0]) == 'f';
+        str[0] = Return.flag ? ' ' : str[0];
+        (void)sscanf_s(str, "%d%d", &playerInputX, &playerInputY);
+        valid = "Select a VALID place to play";
     }
 
     Return.x = playerInputX;
     Return.y = playerInputY;
-    
+
     return Return;
 }
