@@ -37,6 +37,8 @@ static const char* colours[] = {
 
 void initGrid(GameGrid* grid);
 void completeGrid(GameGrid* grid);
+
+void placeFlag(GameGrid* grid, int x, int y);
 int digAt(GameGrid* grid, int x, int y);
 int countBombs(GameGrid* grid);
 int countFound(GameGrid* grid);
@@ -96,6 +98,21 @@ void completeGrid(GameGrid* grid)
             }
             grid->displayGrid[x + y * 20] = charset[index];
         }
+    }
+}
+
+/// <summary>
+/// Place flags at X Y
+/// </summary>
+/// <param name="grid"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+void placeFlag(GameGrid* grid, int x, int y) {
+    if (grid->displayGrid[x + y * 20] == charset[0]) {
+        grid->displayGrid[x + y * 20] = charset[12];
+    }
+    else if (grid->displayGrid[x + y * 20] == charset[12]) {
+        grid->displayGrid[x + y * 20] = charset[0];
     }
 }
 

@@ -58,7 +58,6 @@ int main()
     initGrid(&game);
 
     int bombCount = countBombs(&game);
-    // digAt(bombGrid, gameGrid, 0, 4);
     
     while (playing) 
     {
@@ -68,12 +67,7 @@ int main()
         Input input = playerInput();
         
         if (input.flag) {
-            if (game.displayGrid[input.x + input.y * 20] == charset[0]) {
-                game.displayGrid[input.x + input.y * 20] = charset[12];
-            }
-            else if (game.displayGrid[input.x + input.y * 20] == charset[12]) {
-                game.displayGrid[input.x + input.y * 20] = charset[0];
-            }
+            placeFlag(&game, input.x, input.y);
         }
         else {
             if (game.displayGrid[input.x + input.y * 20] != charset[12])

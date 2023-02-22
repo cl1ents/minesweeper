@@ -8,6 +8,8 @@ typedef struct GameGrid {
 
 void initGrid(GameGrid* grid);
 void completeGrid(GameGrid* grid);
+
+void placeFlag(GameGrid* grid, int x, int y);
 int digAt(GameGrid* grid, int x, int y);
 int countBombs(GameGrid* grid);
 int countFound(GameGrid* grid);
