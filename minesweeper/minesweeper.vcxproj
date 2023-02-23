@@ -127,10 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Array.c" />
     <ClCompile Include="GameGrid.c" />
     <ClCompile Include="minesweeper.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Array.h" />
+    <ClInclude Include="CONSTS.h" />
     <ClInclude Include="GameGrid.h" />
     <ClInclude Include="Input.h" />
   </ItemGroup>
