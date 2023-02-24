@@ -128,11 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Array.c" />
+    <ClCompile Include="CArray.c" />
     <ClCompile Include="GameGrid.c" />
     <ClCompile Include="minesweeper.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Array.h" />
+    <ClInclude Include="CArray.h" />
     <ClInclude Include="CONSTS.h" />
     <ClInclude Include="GameGrid.h" />
     <ClInclude Include="Input.h" />

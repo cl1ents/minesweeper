@@ -7,14 +7,20 @@
 
 #include "Input.h"
 #include "Array.h"
+#include "CArray.h"
 #include "GameGrid.h"
 #include "CONSTS.h"
 
-Input playerInput();
+#define clear if (system("CLS")) system("clear")
+
+Input playerInput(GameGrid *grid);
+int difficulties[] = {
+    9, 8, 5, 4
+};
 
 // MAIN //
 
-/*
+
 void displayArray(Array* arr) {
     for (int i = 0; i < arr->length; i++)
     {
@@ -23,6 +29,7 @@ void displayArray(Array* arr) {
     printf("len: %d; size: %d\n\n", arr->length, arr->size);
 }
 
+/*
 
 int main()
 {
@@ -35,7 +42,7 @@ int main()
     insertInto(&lol, 4);
     displayArray(&lol);
 
-    //push(&lol, 1337);
+    insertInto(&lol, 1337);
     insertInto(&lol, 5);
     removeFrom(&lol, 6);
     displayArray(&lol);
@@ -48,7 +55,22 @@ int main()
     insertIntoIndex(&lol, 10, 0);
     insertIntoIndex(&lol, 11, 2);
     displayArray(&lol);
+    free(lol.array);
+
+    Array lol = newArray();
+
+    insertInto(&lol, 1337);
+    insertInto(&lol, 5);
+    removeFrom(&lol, 1);
+    displayArray(&lol);
+
+    displayArray(&lol);
+    insertIntoIndex(&lol, 10, 0);
+    insertIntoIndex(&lol, 11, 2);
+    displayArray(&lol);
+    free(lol.array);
 }
+
 */
 
 /// <summary>
@@ -59,26 +81,65 @@ int main()
 {
     srand(time(NULL));
 
+    printf("MINESWEEPER\n");
+    printf("\n\nFormat: 'Difficulty Size',\ndifficulty can be a number from 0 to 3, from easiest to hardest.\nSize can be anything from 10 to 50.\nExample: '1 20'");
+    char* valid = "Please type the desired difficulty and size";
+
+    int difficulty = -1;
+    int size = -1;
+
+    while (!(difficulty >= 0 && difficulty <= 3 && size >= 10 && size <= 50))
+    {
+        printf("\n%s> ", valid);
+
+        char str[20];
+        fgets(str, 20, stdin);
+
+        (void)sscanf_s(str, "%d%d", &difficulty, &size);
+        valid = "Please type a VALID difficulty and size";
+    }
+
+
     int playing = 1;
+    int moveCount = 0;
     int won = 0;
     GameGrid game;
+
+    Array bombGrid;
+    game.bombGrid = &bombGrid;
+    CArray displayGrid;
+    game.displayGrid = &displayGrid;
+
+    game.gridSize = size;
+    game.arraySize = game.gridSize * game.gridSize;
+
+    cInitArraySize(game.displayGrid, game.arraySize);
+    initArraySize(game.bombGrid, game.arraySize);
+
     initGrid(&game);
 
-    int bombCount = countBombs(&game);
+    int bombCount = game.arraySize / difficulties[difficulty];
     
     while (playing) 
     {
-        if (system("CLS")) system("clear");
+        clear;
         displayGameGrid(&game);
         printf("\nBOMBS: %d\nTO DIG: %d", bombCount, countFound(&game));
-        Input input = playerInput();
+        Input input = playerInput(&game);
         
         if (input.flag) {
             placeFlag(&game, input.x, input.y);
         }
         else {
-            if (game.displayGrid[input.x + input.y * 20] != charset[12])
-                 playing = !digAt(&game, input.x, input.y);
+            if (!moveCount)
+            {
+                placeBombs(&game, &input, difficulties[difficulty]);
+                bombCount = countBombs(&game);
+            }
+
+            if (game.displayGrid->array[input.x + input.y * 20] != charset[12])
+                playing = !digAt(&game, input.x, input.y);
+                moveCount++;
         }
 
         if (bombCount == countFound(&game))
@@ -118,7 +179,7 @@ void Flush()
 /// gets input from user
 /// </summary>
 
-Input playerInput() {
+Input playerInput(GameGrid *game) {
     int playerInputX = -1;
     int playerInputY = -1;
     Input Return;
@@ -126,7 +187,7 @@ Input playerInput() {
 
     printf("\n\nFormat: 'X Y', add an 'f' at the start if you want to place a flag (Example: 'f 10 10', '5 8')");
     char* valid = "Where do you want to play?";
-    while (!(playerInputX >= 0 && playerInputX < SIZE && playerInputY >= 0 && playerInputY < SIZE))
+    while (!(playerInputX >= 0 && playerInputX < game->gridSize && playerInputY >= 0 && playerInputY < game->gridSize))
     {
         printf("\n%s> ", valid);
 
