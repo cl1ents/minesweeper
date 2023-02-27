@@ -13,7 +13,8 @@
 
 #define clear if (system("CLS")) system("clear")
 
-Input playerInput(GameGrid *grid);
+Input playerInput(GameGrid * grid);
+void game();
 int difficulties[] = {
     9, 8, 5, 4
 };
@@ -78,6 +79,32 @@ int main()
 /// </summary>
 /// <returns>int</returns>
 int main()
+{
+    while (1) {
+        game();
+
+        char c = ' ';
+        printf("\n\n");
+        while (c != 'y' && c != 'n')
+        {
+            printf("Do you want to restart? (y/n)> ");
+
+            char str[20];
+            fgets(str, 20, stdin);
+            (void)sscanf_s(str, "%c", &c);
+        }
+
+        if (c == 'n') {
+            break;
+        }
+    }
+}
+
+/// <summary>
+/// Game initializing & Play
+/// </summary>
+/// <returns></returns>
+void game()
 {
     srand(time(NULL));
 
@@ -161,6 +188,9 @@ int main()
     {
         printf("\nYou Lost Lol.... Loser..... Lol?...........");
     }
+
+    free(displayGrid.array);
+    free(bombGrid.array);
 }
 
 // FUNCTIONS //
